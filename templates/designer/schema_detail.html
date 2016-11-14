@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gremlin Schema - {{ object.name }}</title>
+</head>
+<body>
+<h1>{{ object.name }}</h1>
+<textarea cols="120" rows="30">
+{% for property in object.properties.all %}{% if property.meta_properties.count == 0 %}schema.propertyKey("{{ property.name }}").{{ property.property_type }}(){% if property.multiple_cardinality %}.multiple(){% endif %}{% if property.meta_properties.count > 0 %}.properties({% for meta_property in property.meta_properties.all %}{% if forloop.last %}"{{ meta_property.name }}"{% else %}"{{ meta_property.name }}",{% endif %}{% endfor %}){% endif %}.create();{% endif %}
+{% endfor %}{% for property in object.properties.all %}{% if property.meta_properties.count > 0 %}schema.propertyKey("{{ property.name }}").{{ property.property_type }}(){% if property.multiple_cardinality %}.multiple(){% endif %}{% if property.meta_properties.count > 0 %}.properties({% for meta_property in property.meta_properties.all %}{% if forloop.last %}"{{ meta_property.name }}"{% else %}"{{ meta_property.name }}",{% endif %}{% endfor %}){% endif %}.create();{% endif %}{% endfor %}
+{% for vertex in object.vertices.all %}
+schema.vertexLabel("{{ vertex.label }}"){% if vertex.properties.count > 0 %}.properties({% for property in vertex.properties.all %}{% if forloop.last %}"{{ property.name }}"{% else %}"{{ property.name }}",{% endif %}{% endfor %}){% endif %}.create();{% endfor %}
+
+{% for edge in object.edges.all %}
+schema.edgeLabel("{{ edge.label }}"){% if not property.multiple_cardinality %}.single(){% endif %}{% if edge.properties.count > 0 %}.properties({% for property in edge.properties.all %}{% if forloop.last %}"{{ property.name }}"{% else %}"{{ property.name }}",{% endif %}{% endfor %}){% endif %}{% for connection in edge.connections.all %}.connection("{{ connection.from_vertex.label }}", "{{ connection.to_vertex.label }}"){% endfor %}.create();{% endfor %}
+
+{% for vertex in object.vertices.all %}{% for vertex_index in vertex.vertex_indexes.all %}
+schema.vertexLabel("{{ vertex.label }}").index("{{ vertex_index.name }}").{{ vertex_index.property_type }}(){% for property in vertex_index.properties.all %}.by("{{ property.name }}"){% endfor %}.add();{% endfor %}{% endfor %}
+</textarea>
+<p>Date: {{ now|date:"Y F d, H:m:s" }}</p>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gremlin Schemas</title>
+</head>
+<body>
+    <h1>Gremlin Schemas</h1>
+    <ul>
+    {% for schema in object_list %}
+        <li><a href="{% url 'schema-detail' slug=schema.slug %}">{{ schema.name }}</a> - {{ schema.description }}</li>
+    {% empty %}
+        <li>No schemas yet.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
